@@ -110,7 +110,7 @@ def find_reversed():
             next_step = inner_rev(map, next_step)
         if is_valid_seed(next_step, seed_pairs):
             print(f"rev search result location {i} for seed {next_step}")
-            return next_step
+            return i
         i += 1
 
 print(find_reversed())
