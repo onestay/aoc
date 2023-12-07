@@ -1,4 +1,3 @@
-import concurrent.futures
 from dataclasses import dataclass
 from typing import Any, Generator, TypeAlias
 
@@ -11,7 +10,8 @@ class Map:
     dest: int
     range: int
 
-ListOfMappings: TypeAlias = list[tuple[int,int]]
+
+ListOfMappings: TypeAlias = list[tuple[int, int]]
 
 
 def parse_data(data: list[str]) -> tuple[list[list[Map]], list[int]]:
@@ -72,11 +72,10 @@ def all_seeds_generator(start, length):
         for s in range(start, start + length):
             yield s
 
-lowest = None
 seed_pairs = list(zip(seeds[::2], seeds[1::2]))
 generator_functions = [all_seeds_generator(start, length) for start, length in seed_pairs]
 
-def find_in_this_executor(seed_pairs: tuple[int, int]) -> int:
+def find(seed_pairs: tuple[int, int]) -> int:
     print(f"starting at {seed_pairs[0]} for {seed_pairs[1]}")
     lowest = None
     for seed in all_seeds_generator(seed_pairs[0], seed_pairs[1]):
@@ -84,13 +83,34 @@ def find_in_this_executor(seed_pairs: tuple[int, int]) -> int:
 
         if lowest is None or current_location < lowest:
             lowest = current_location
-    return lowest or 9
+    return lowest or 0
+    
+#for pair in seed_pairs:
+#    print(find(pair))
 
-def main():
-    if __name__ == "__main__":
-        with concurrent.futures.ProcessPoolExecutor() as executor:
-            for lowest in executor.map(find_in_this_executor, seed_pairs):
-                print(lowest)
+def inner_rev(map: list[Map], seed: int) -> int:
+    for r in map:
+        if seed in range(r.dest, r.dest + r.range):
+            seed -= r.dest - r.source
+            return seed
+    return seed
 
-if __name__ == "__main__":
-    main()
+def is_valid_seed(seed_num: int, seed_pairs: list[tuple[int,int]]) -> bool:
+    for seed_pair in seed_pairs:
+        if seed_num in range(seed_pair[0], seed_pair[0] + seed_pair[1]):
+            return True
+    return False
+
+def find_reversed():
+    print("starting reverse search")
+    i = 67832336
+    while True:
+        next_step = i
+        for map in reversed(map_list):
+            next_step = inner_rev(map, next_step)
+        if is_valid_seed(next_step, seed_pairs):
+            print(f"rev search result location {i} for seed {next_step}")
+            return next_step
+        i += 1
+
+print(find_reversed())
